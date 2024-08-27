@@ -19,13 +19,9 @@
 }
 
 h1 {
-  margin-bottom: 10px;
-  font-size: 2.5em;
-}
-
-h2 {
   margin-bottom: 20px;
-  font-size: 2em;
+  font-size: 2.5em;
+  color: #61dafb;
 }
 
 /* Styling for the token table */
@@ -36,17 +32,26 @@ h2 {
   width: 100%;
 }
 
+/* Styling for the table header row */
+.header-row {
+  background-color: #444;
+  font-weight: bold;
+  border-bottom: 2px solid #61dafb;
+  padding: 10px 0;
+  cursor: pointer;
+}
+
 /* Styling for each row in the token table */
 .token-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
-  padding: 15px;
+  margin-bottom: 10px;
+  padding: 10px;
   background-color: #333;
-  border-radius: 10px;
+  border-radius: 5px;
   transition: background-color 0.3s ease;
-  flex-wrap: wrap; /* Allow row to wrap elements */
+  flex-wrap: nowrap; /* Prevent row from wrapping elements */
 }
 
 .token-row:hover {
@@ -55,22 +60,36 @@ h2 {
 
 /* Styling for each column in the token row */
 .token-column {
-  flex: 1;
-  padding: 0 10px;
+  padding: 5px 10px;
   text-align: left;
+  flex: 1;
 }
 
-/* Specific styling for time, address, and link columns */
+/* Specific styling for time, address, pair, volume, and link columns */
 .time-column {
-  flex-basis: 30%;
-  font-size: 1.2em;
+  flex-basis: 20%;
+  font-size: 1.1em;
   color: #bbb;
 }
 
 .address-column {
-  flex-basis: 50%;
-  font-size: 1.2em;
+  flex-basis: 25%;
+  font-size: 1.1em;
   word-wrap: break-word;
+  color: #bbb;
+}
+
+.pair-column {
+  flex-basis: 20%;
+  font-size: 1.1em;
+  color: #61dafb;
+}
+
+.volume-column {
+  flex-basis: 15%;
+  text-align: right;
+  font-size: 1.1em;
+  color: #61dafb;
 }
 
 .link-column {
@@ -81,7 +100,7 @@ h2 {
 /* Styling for the "View Token" button */
 .token-button {
   display: inline-block;
-  padding: 10px 20px;
+  padding: 8px 16px;
   background-color: #61dafb;
   color: black;
   border-radius: 5px;
@@ -103,10 +122,6 @@ h2 {
     font-size: 2em;
   }
 
-  h2 {
-    font-size: 1.5em;
-  }
-
   .token-row {
     flex-direction: column;
     align-items: flex-start;
@@ -117,7 +132,7 @@ h2 {
     padding: 5px 0;
   }
 
-  .time-column, .address-column, .link-column {
+  .time-column, .address-column, .pair-column, .volume-column, .link-column {
     flex-basis: auto;
     width: 100%;
     text-align: left;
