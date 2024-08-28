@@ -6,81 +6,34 @@ function App() {
   const [sortConfig, setSortConfig] = useState({ key: 'block_time', direction: 'desc' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const apiKey = '6OFd8MOOeLCuWUMpGXAfnD4ctXmj5yIH'; // Placeholder Dune API key
 
-    // Function to trigger query execution
-    const triggerQueryExecution = async (queryId) => {
-      try {
-        const response = await fetch(`https://api.dune.com/api/v1/query/${queryId}/execute`, {
-          method: 'POST',
-          headers: {
-            'X-Dune-API-Key': apiKey,
-            'Content-Type': 'application/json',
-          },
-        });
-        const data = await response.json();
-        console.log(`Triggered query ${queryId}, execution ID: ${data.execution_id}`);
-        return data.execution_id;
-      } catch (error) {
-        console.error('Error triggering query execution:', error);
-        throw error;
-      }
-    };
-
-    // Function to fetch query results
-    const fetchQueryResults = async (executionId) => {
-      try {
-        const response = await fetch(`https://api.dune.com/api/v1/execution/${executionId}/results`, {
-          headers: {
-            'X-Dune-API-Key': apiKey,
-          },
-        });
-        const data = await response.json();
-        if (data.result && data.result.rows) {
-          return data.result.rows;
-        } else {
-          throw new Error('Query results are not ready or no data available.');
-        }
-      } catch (error) {
-        console.error('Error fetching query results:', error);
-        throw error;
-      }
-    };
-
+    // Function to fetch the data
     const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
-        setProgress(0);
 
-        // Simulate progress bar filling up
-        const interval = setInterval(() => {
-          setProgress(oldProgress => {
-            if (oldProgress >= 100) {
-              clearInterval(interval);
-              return 100;
-            }
-            return oldProgress + 1;
-          });
-        }, 1200); // Progress bar fills in 2 minutes (120s)
+        // Fetch data from both queries
+        const response1 = await fetch(`https://api.dune.com/api/v1/query/4022946/results?limit=1000`, {
+          headers: {
+            'X-Dune-API-Key': apiKey,
+          },
+        });
+        const data1 = await response1.json();
 
-        // Trigger execution for both queries
-        const executionId1 = await triggerQueryExecution('4022946');
-        const executionId2 = await triggerQueryExecution('4023501');
+        const response2 = await fetch(`https://api.dune.com/api/v1/query/4023501/results?limit=1000`, {
+          headers: {
+            'X-Dune-API-Key': apiKey,
+          },
+        });
+        const data2 = await response2.json();
 
-        // Wait for 120 seconds before fetching the results
-        await new Promise(res => setTimeout(res, 120000)); // 120 seconds wait
-
-        // Fetch the results after the wait
-        const data1 = await fetchQueryResults(executionId1);
-        const data2 = await fetchQueryResults(executionId2);
-
-        // Combine data
-        const combinedData = data1.map(tokenRow => {
-          const matchingVolumeRow = data2.find(volumeRow => volumeRow.token === tokenRow.token_address);
+        // Combine the data
+        const combinedData = data1.result.rows.map(tokenRow => {
+          const matchingVolumeRow = data2.result.rows.find(volumeRow => volumeRow.token === tokenRow.token_address);
           return {
             ...tokenRow,
             token_pair: matchingVolumeRow ? matchingVolumeRow.token_pair : 'N/A',
@@ -90,7 +43,6 @@ function App() {
 
         setTableData(combinedData);
         setLoading(false);
-        setProgress(100); // Set progress to 100% once data is loaded
       } catch (error) {
         setError(error.message);
         setLoading(false);
@@ -100,7 +52,7 @@ function App() {
     // Fetch data immediately on mount
     fetchData();
 
-    // Set up an interval to re-trigger every 120 seconds
+    // Set up an interval to refresh data every 120 seconds
     const interval = setInterval(fetchData, 120000);
 
     // Clean up the interval on component unmount
@@ -128,12 +80,7 @@ function App() {
   return (
     <div className="App">
       {loading ? (
-        <div>
-          <p>Loading data...</p>
-          <div className="progress-bar">
-            <div className="progress" style={{ width: `${progress}%` }}></div>
-          </div>
-        </div>
+        <p>Loading data...</p>
       ) : error ? (
         <p>Error: {error}</p>
       ) : (
