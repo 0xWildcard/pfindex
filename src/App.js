@@ -10,6 +10,7 @@ function App() {
   useEffect(() => {
     const apiKey = '6OFd8MOOeLCuWUMpGXAfnD4ctXmj5yIH'; // Placeholder Dune API key
 
+    // Function to trigger query execution
     const triggerQueryExecution = async (queryId) => {
       try {
         const response = await fetch(`https://api.dune.com/api/v1/query/${queryId}/execute`, {
@@ -20,6 +21,7 @@ function App() {
           },
         });
         const data = await response.json();
+        console.log(`Triggered query ${queryId}, execution ID: ${data.execution_id}`);
         return data.execution_id;
       } catch (error) {
         console.error('Error triggering query execution:', error);
@@ -27,31 +29,20 @@ function App() {
       }
     };
 
+    // Function to fetch query results
     const fetchQueryResults = async (executionId) => {
       try {
-        // Polling the API until the query execution is complete
-        let isComplete = false;
-        let data;
-
-        while (!isComplete) {
-          const response = await fetch(`https://api.dune.com/api/v1/execution/${executionId}/results`, {
-            headers: {
-              'X-Dune-API-Key': apiKey,
-            },
-          });
-          data = await response.json();
-
-          if (data.state === 'QUERY_STATE_COMPLETED') {
-            isComplete = true;
-          } else if (data.state === 'QUERY_STATE_FAILED') {
-            throw new Error('Query execution failed');
-          } else {
-            // Wait for 3 seconds before trying again
-            await new Promise(res => setTimeout(res, 3000));
-          }
+        const response = await fetch(`https://api.dune.com/api/v1/execution/${executionId}/results`, {
+          headers: {
+            'X-Dune-API-Key': apiKey,
+          },
+        });
+        const data = await response.json();
+        if (data.result && data.result.rows) {
+          return data.result.rows;
+        } else {
+          throw new Error('Query results are not ready or no data available.');
         }
-
-        return data.result.rows;
       } catch (error) {
         console.error('Error fetching query results:', error);
         throw error;
@@ -63,16 +54,18 @@ function App() {
         setLoading(true);
         setError(null);
 
+        // Trigger execution for both queries
         const executionId1 = await triggerQueryExecution('4022946');
         const executionId2 = await triggerQueryExecution('4023501');
 
+        // Wait for 120 seconds before fetching the results
+        await new Promise(res => setTimeout(res, 120000)); // 120 seconds wait
+
+        // Fetch the results after the wait
         const data1 = await fetchQueryResults(executionId1);
         const data2 = await fetchQueryResults(executionId2);
 
-        if (!data1 || !data2) {
-          throw new Error('Failed to fetch data');
-        }
-
+        // Combine data
         const combinedData = data1.map(tokenRow => {
           const matchingVolumeRow = data2.find(volumeRow => volumeRow.token === tokenRow.token_address);
           return {
@@ -90,10 +83,13 @@ function App() {
       }
     };
 
+    // Fetch data immediately on mount
     fetchData();
 
+    // Set up an interval to re-trigger every 120 seconds
     const interval = setInterval(fetchData, 120000);
 
+    // Clean up the interval on component unmount
     return () => clearInterval(interval);
   }, []);
 
