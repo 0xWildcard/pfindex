@@ -12,6 +12,24 @@
   padding: 20px;
 }
 
+/* Progress bar container */
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background-color: #444;
+  border-radius: 5px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+/* Actual progress */
+.progress {
+  height: 100%;
+  background-color: #61dafb;
+  border-radius: 5px;
+  transition: width 0.1s ease-in-out;
+}
+
 /* Styling for the header and main title */
 .App-header {
   width: 90%;
@@ -37,8 +55,8 @@ h1 {
   border-bottom: 2px solid #61dafb;
   padding: 10px 0;
   display: grid;
-  grid-template-columns: 20% 20% 20% 30% 10%; /* Adjusted column widths */
-  text-align: center; /* Center align header text */
+  grid-template-columns: 20% 20% 20% 30% 10%;
+  text-align: center;
 }
 
 .header-row > div {
@@ -49,7 +67,7 @@ h1 {
 /* Styling for each row in the token table */
 .token-row {
   display: grid;
-  grid-template-columns: 20% 20% 20% 30% 10%; /* Adjusted column widths */
+  grid-template-columns: 20% 20% 20% 30% 10%;
   margin-bottom: 10px;
   padding: 10px;
   background-color: #333;
@@ -64,7 +82,7 @@ h1 {
 /* Styling for each column in the token row */
 .token-column {
   padding: 10px;
-  text-align: center; /* Center align content */
+  text-align: center;
   word-wrap: break-word;
 }
 
@@ -77,7 +95,7 @@ h1 {
 .pair-column {
   font-size: 1.1em;
   color: #61dafb;
-  word-break: break-all; /* Ensure the text wraps nicely */
+  word-break: break-all;
 }
 
 .volume-column {
@@ -87,9 +105,9 @@ h1 {
 }
 
 .address-column {
-  font-size: 0.9em; /* Reduce font size to fit better */
+  font-size: 0.9em;
   color: #bbb;
-  word-break: break-all; /* Ensure the text wraps nicely */
+  word-break: break-all;
 }
 
 .link-column {
@@ -98,7 +116,7 @@ h1 {
 
 /* Styling for the "View Token" button */
 .token-button {
-  padding: 5px 10px; /* Reduced padding */
+  padding: 5px 10px;
   background-color: #61dafb;
   color: black;
   border-radius: 5px;
@@ -106,8 +124,8 @@ h1 {
   font-weight: bold;
   transition: background-color 0.3s ease, color 0.3s ease;
   display: inline-block;
-  width: 100%; /* Ensure the button fits the width of the container */
-  box-sizing: border-box; /* Include padding and border in width */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .token-button:hover {

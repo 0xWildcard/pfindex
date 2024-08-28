@@ -6,6 +6,7 @@ function App() {
   const [sortConfig, setSortConfig] = useState({ key: 'block_time', direction: 'desc' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const apiKey = '6OFd8MOOeLCuWUMpGXAfnD4ctXmj5yIH'; // Placeholder Dune API key
@@ -53,6 +54,18 @@ function App() {
       try {
         setLoading(true);
         setError(null);
+        setProgress(0);
+
+        // Simulate progress bar filling up
+        const interval = setInterval(() => {
+          setProgress(oldProgress => {
+            if (oldProgress >= 100) {
+              clearInterval(interval);
+              return 100;
+            }
+            return oldProgress + 1;
+          });
+        }, 1200); // Progress bar fills in 2 minutes (120s)
 
         // Trigger execution for both queries
         const executionId1 = await triggerQueryExecution('4022946');
@@ -77,6 +90,7 @@ function App() {
 
         setTableData(combinedData);
         setLoading(false);
+        setProgress(100); // Set progress to 100% once data is loaded
       } catch (error) {
         setError(error.message);
         setLoading(false);
@@ -114,7 +128,12 @@ function App() {
   return (
     <div className="App">
       {loading ? (
-        <p>Loading data...</p>
+        <div>
+          <p>Loading data...</p>
+          <div className="progress-bar">
+            <div className="progress" style={{ width: `${progress}%` }}></div>
+          </div>
+        </div>
       ) : error ? (
         <p>Error: {error}</p>
       ) : (
