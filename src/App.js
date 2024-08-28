@@ -10,29 +10,71 @@ function App() {
   useEffect(() => {
     const apiKey = '6OFd8MOOeLCuWUMpGXAfnD4ctXmj5yIH'; // Placeholder Dune API key
 
+    const triggerQueryExecution = async (queryId) => {
+      try {
+        const response = await fetch(`https://api.dune.com/api/v1/query/${queryId}/execute`, {
+          method: 'POST',
+          headers: {
+            'X-Dune-API-Key': apiKey,
+            'Content-Type': 'application/json',
+          },
+        });
+        const data = await response.json();
+        return data.execution_id;
+      } catch (error) {
+        console.error('Error triggering query execution:', error);
+        throw error;
+      }
+    };
+
+    const fetchQueryResults = async (executionId) => {
+      try {
+        // Polling the API until the query execution is complete
+        let isComplete = false;
+        let data;
+
+        while (!isComplete) {
+          const response = await fetch(`https://api.dune.com/api/v1/execution/${executionId}/results`, {
+            headers: {
+              'X-Dune-API-Key': apiKey,
+            },
+          });
+          data = await response.json();
+
+          if (data.state === 'QUERY_STATE_COMPLETED') {
+            isComplete = true;
+          } else if (data.state === 'QUERY_STATE_FAILED') {
+            throw new Error('Query execution failed');
+          } else {
+            // Wait for 3 seconds before trying again
+            await new Promise(res => setTimeout(res, 3000));
+          }
+        }
+
+        return data.result.rows;
+      } catch (error) {
+        console.error('Error fetching query results:', error);
+        throw error;
+      }
+    };
+
     const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const response1 = await fetch('https://api.dune.com/api/v1/query/4022946/results?limit=1000', {
-          headers: {
-            'X-Dune-API-Key': apiKey,
-          },
-        });
-        if (!response1.ok) throw new Error('Error fetching first query data');
-        const data1 = await response1.json();
+        const executionId1 = await triggerQueryExecution('4022946');
+        const executionId2 = await triggerQueryExecution('4023501');
 
-        const response2 = await fetch('https://api.dune.com/api/v1/query/4023501/results?limit=1000', {
-          headers: {
-            'X-Dune-API-Key': apiKey,
-          },
-        });
-        if (!response2.ok) throw new Error('Error fetching second query data');
-        const data2 = await response2.json();
+        const data1 = await fetchQueryResults(executionId1);
+        const data2 = await fetchQueryResults(executionId2);
 
-        const combinedData = data1.result.rows.map(tokenRow => {
-          const matchingVolumeRow = data2.result.rows.find(volumeRow => volumeRow.token === tokenRow.token_address);
+        if (!data1 || !data2) {
+          throw new Error('Failed to fetch data');
+        }
+
+        const combinedData = data1.map(tokenRow => {
+          const matchingVolumeRow = data2.find(volumeRow => volumeRow.token === tokenRow.token_address);
           return {
             ...tokenRow,
             token_pair: matchingVolumeRow ? matchingVolumeRow.token_pair : 'N/A',
