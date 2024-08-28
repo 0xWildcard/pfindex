@@ -119,7 +119,7 @@ function App() {
         <p>Error: {error}</p>
       ) : (
         <header className="App-header">
-          <h1>Token Trading Volume (Last 24 Hours)</h1>
+          <h1>Pump.Fun Graduated Tokens (Last 24 Hours)</h1>
           <div className="token-table">
             <div className="token-row header-row">
               <div className="token-column time-column" onClick={() => sortData('block_time')}>
